@@ -1,0 +1,232 @@
+<html>
+	<head>
+		<title></title>
+		<script languaje="JavaScript">
+
+		var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+		var clockElm,
+			background_imageElm;
+
+		var playingClock = false;
+		var partyNow = 1;			// Default party set as 1 ( "The first" )
+		var lastPartyNow = 1;		// Prevents substracting the new value in the countdown function
+		var defaultTime = 600.000;
+
+		// Time for each party, in seconds!
+		var partyClocks = new Array(
+			defaultTime,
+			defaultTime,
+			defaultTime,
+			defaultTime,
+			defaultTime,
+			defaultTime);
+
+		var backTime;
+		
+
+		window.onload = function(){
+			// Set the clock to the middle:
+			clockElm = document.getElementById("clock");
+			background_imageElm = document.getElementById("background_image");
+			window.onresize = function(){ setClockElementAtMiddle();};
+			setClockElementAtMiddle();
+		};
+
+		function setClockElementAtMiddle(){
+			clockElm.style.fontSize = 0.4*window.innerHeight;
+			clockElm.style.top = 0.27*window.innerHeight;
+		}
+
+
+		function clockCountDown(){
+
+			if(lastPartyNow != partyNow || !playingClock){
+				playingClock = false;
+				return;
+			}
+
+			partyClocks[partyNow]-= ((new Date())-backTime)/1000;
+			backTime = new Date();
+			var minutes = parseInt(partyClocks[partyNow]/60);
+			var seconds = parseInt(partyClocks[partyNow]-minutes*60);
+
+			if(partyClocks[partyNow]<0){
+				
+
+				// Correction for 0:00 minute change from positive to negative
+				minutes = parseInt((partyClocks[partyNow]-1)/60);
+				seconds = -parseInt((partyClocks[partyNow]-1)-minutes*60);
+				if(minutes == 0){ minutes = "-0";}
+			}
+
+			if(seconds<10){ seconds = "0"+seconds; }
+
+			var timeText = ""+minutes+":"+seconds;
+			
+			clockElm.innerHTML = timeText; 
+			if(partyClocks[partyNow] <= 30){
+				clockElm.style.color="#FF0000";
+				
+			}else{
+				clockElm.style.color="#FFF";
+
+			}
+
+
+			if(playingClock){
+				requestAnimationFrame(clockCountDown);
+			}
+		}
+
+		function setClockParty(n){
+			playingClock = false;
+			partyNow = n-1;			// Array's starts at zero!
+			background_imageElm.src = "fondos/"+n+".jpg";
+			var minutes = parseInt(partyClocks[partyNow]/60);
+			var seconds = parseInt(partyClocks[partyNow]-minutes*60);
+
+			if(partyClocks[partyNow]<0){
+				
+
+				// Correction for 0:00 minute change from positive to negative
+				minutes = parseInt((partyClocks[partyNow]-1)/60);
+				seconds = -parseInt((partyClocks[partyNow]-1)-minutes*60);
+				if(minutes == 0){ minutes = "-0";}
+			}
+
+			if(seconds<10){ seconds = "0"+seconds; }
+
+			var timeText = ""+minutes+":"+seconds;
+			
+			clockElm.innerHTML = timeText; 
+			if(partyClocks[partyNow] <= 30){
+				clockElm.style.color="#FF0000";
+				
+			}else{
+				clockElm.style.color="#FFF";
+
+			}
+			
+			clockElm.innerHTML = timeText; 
+
+		}
+
+		function playClock(){
+			playingClock = true;
+			lastPartyNow = partyNow;
+			backTime = new Date();
+			
+			requestAnimationFrame(clockCountDown);
+		}
+
+		function stopClock(){ playingClock = false; }
+
+		function changeTime(){
+			var minutes = parseInt(prompt("Minutos:"));
+			var seconds = parseInt(prompt("Seconds:"));
+			
+			if(isNaN(minutes)){minutes = 0; }
+			if(isNaN(seconds)){seconds = 0; }
+
+			var realTime = seconds+minutes*60;
+			var n = partyClocks.length;
+			while(n--){
+				partyClocks[n] = realTime;
+			}
+			setClockParty(partyNow+1);
+		}
+
+		function addParty(){
+			partyClocks.push(defaultTime);
+			var n = partyClocks.length;
+			document.getElementById("partyMenu").innerHTML+='<span class="menu_element" onClick="setClockParty('+n+');">Partido '+n+'</span>';
+
+		}
+		</script>
+
+		<style type="text/css">
+		body {
+			width:100%;
+			height:100%;
+			border: 0px;
+			margin: 0px;
+			overflow:hidden;
+		}
+
+		#background_image {
+			position:absolute;
+			top:0px;
+			left:0px;
+			right:0px;
+			bottom:0px;
+			width:100%;
+			height:100%;
+			z-index:1;
+		}
+		#clock {
+			position:absolute;
+			top:30%;
+			height:40%;
+			width:100%;
+			font-size:100px;
+			z-index:2;
+			text-align:center;
+			vertical-align: middle;
+			color:#FFF;
+			-webkit-text-stroke: 3px black;
+			text-stroke: 3px black;
+			-moz-text-stroke: 3px black;
+		}
+
+		#menu {
+			position:absolute;
+			top:0px;
+			left:0px;
+			right:0px;
+			height:30px;
+			font-size:20px;
+			background:rgba(0,0,0,0.6);
+			color:#DDDDDD;
+			z-index:2;
+		}
+
+		#partyMenu {
+			display:inline-block;
+		}
+
+		.menu_element {
+			padding-top: 5px;
+			padding-left:10px;
+			padding-right:10px;
+			cursor:pointer;
+		}
+
+		.red {
+			color:#EE1010;
+		}
+
+		.green {
+			color:#10EE10;
+		}
+		</style>
+	</head>
+	<body>
+		<div id="menu">
+			<div id="partyMenu">
+				<span class="menu_element" onClick="setClockParty(1);">Partido 1</span>
+				<span class="menu_element" onClick="setClockParty(2);">Partido 2</span>
+				<span class="menu_element" onClick="setClockParty(3);">Partido 3</span>
+				<span class="menu_element" onClick="setClockParty(4);">Partido 4</span>
+				<span class="menu_element" onClick="setClockParty(5);">Partido 5</span>
+				<span class="menu_element" onClick="setClockParty(6);">Partido 6</span>
+			</div>
+			<span class="menu_element green" onClick="playClock();">Comenzar</span>
+			<span class="menu_element red" onClick="stopClock();">Parar</span>
+			<span class="menu_element" onClick="changeTime();">Cambiar Tiempo</span>
+			<span class="menu_element" onClick="addParty();">A&ntilde;adir</span>
+		</div>
+		<img src="fondos/1.jpg" id="background_image"/>
+		<div id="clock">--:--</div>
+	</body>
+</html>
